@@ -25,7 +25,6 @@ public class ApplicationDbSeeder
         try
         {
             await TrySeedAsync();
-            await _context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -72,12 +71,16 @@ public class ApplicationDbSeeder
             await _context.Events.AddRangeAsync(event1, event2);
             await _context.SaveChangesAsync();
 
-            // Add participants to events
-            event1.AddParticipant(users[1], ParticipantStatus.Accepted);
-            event1.AddParticipant(users[2], ParticipantStatus.Pending);
+            // Reload events from database to avoid concurrency issues
+            var freshEvent1 = await _context.Events.Include(e => e.Participants).FirstAsync(e => e.Id == event1.Id);
+            var freshEvent2 = await _context.Events.Include(e => e.Participants).FirstAsync(e => e.Id == event2.Id);
             
-            event2.AddParticipant(users[1], ParticipantStatus.Tentative);
-            event2.AddParticipant(users[2], ParticipantStatus.Accepted);
+            // Add participants to events
+            freshEvent1.AddParticipant(users[1], ParticipantStatus.Accepted);
+            freshEvent1.AddParticipant(users[2], ParticipantStatus.Pending);
+            
+            freshEvent2.AddParticipant(users[1], ParticipantStatus.Tentative);
+            freshEvent2.AddParticipant(users[2], ParticipantStatus.Accepted);
 
             await _context.SaveChangesAsync();
             

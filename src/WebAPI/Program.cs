@@ -37,7 +37,11 @@ await app.Services.InitializeDatabaseAsync();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Calendar API v1");
+        c.RoutePrefix = string.Empty; // Serve Swagger UI at the app's root
+    });
 }
 
 app.UseHttpsRedirection();
@@ -49,5 +53,8 @@ app.MapUserEndpoints();
 app.MapEventEndpoints();
 app.MapParticipantEndpoints();
 app.MapSchedulingEndpoints();
+
+// Add a redirect from the root URL to the Swagger UI
+app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
 app.Run();

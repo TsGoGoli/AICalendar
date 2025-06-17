@@ -40,18 +40,24 @@ public class ApplicationDbSeeder
         {
             _logger.LogInformation("Seeding users...");
 
+            // Create an admin user
+            var adminUser = new User("Admin User", "admin@aicalendar.com", "admin");
+            adminUser.AddRole("Admin");
+            adminUser.SetPassword("Admin123!"); // In a real app, use a secure password
+
             var users = new List<User>
             {
-                new User("John Smith", "john.smith@example.com", "jsmith"),
-                new User("Jane Doe", "jane.doe@example.com", "jdoe"),
-                new User("Bob Johnson", "bob.johnson@example.com", "bjohnson")
+                adminUser,
+                CreateUser("John Smith", "john.smith@example.com", "jsmith", "Password123!"),
+                CreateUser("Jane Doe", "jane.doe@example.com", "jdoe", "Password123!"),
+                CreateUser("Bob Johnson", "bob.johnson@example.com", "bjohnson", "Password123!")
             };
 
             await _context.Users.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
             // Seed Events and Participants
-            var organizer = users[0]; // John is the organizer
+            var organizer = users[1]; // John is the organizer
             var now = DateTime.UtcNow;
             var tomorrow = now.AddDays(1);
             var nextWeek = now.AddDays(7);
@@ -76,15 +82,22 @@ public class ApplicationDbSeeder
             var freshEvent2 = await _context.Events.Include(e => e.Participants).FirstAsync(e => e.Id == event2.Id);
             
             // Add participants to events
-            freshEvent1.AddParticipant(users[1], ParticipantStatus.Accepted);
-            freshEvent1.AddParticipant(users[2], ParticipantStatus.Pending);
+            freshEvent1.AddParticipant(users[2], ParticipantStatus.Accepted);
+            freshEvent1.AddParticipant(users[3], ParticipantStatus.Pending);
             
-            freshEvent2.AddParticipant(users[1], ParticipantStatus.Tentative);
-            freshEvent2.AddParticipant(users[2], ParticipantStatus.Accepted);
+            freshEvent2.AddParticipant(users[2], ParticipantStatus.Tentative);
+            freshEvent2.AddParticipant(users[3], ParticipantStatus.Accepted);
 
             await _context.SaveChangesAsync();
             
             _logger.LogInformation("Seed data added successfully");
         }
+    }
+
+    private User CreateUser(string name, string email, string username, string password)
+    {
+        var user = new User(name, email, username);
+        user.SetPassword(password);
+        return user;
     }
 }

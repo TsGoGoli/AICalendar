@@ -44,20 +44,14 @@ public static class InfrastructureServiceRegistration
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
-                sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 5,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorNumbersToAdd: null);
-                });
+                configuration.GetConnectionString("DefaultConnection"));
                 
-            // Suppress the pending model changes warning in development
+            // Configure EF Core for development environment
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
-                options.ConfigureWarnings(warnings =>
-                    warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                // Enable detailed logging in development
+                options.EnableSensitiveDataLogging();
+                options.EnableDetailedErrors();
             }
         });
         
@@ -108,7 +102,7 @@ public static class InfrastructureServiceRegistration
     }
     
     /// <summary>
-    /// Ensures the database is created and migrated
+    /// Ensures the database is created and seeded
     /// </summary>
     /// <param name="serviceProvider">The service provider</param>
     public static async Task InitializeDatabaseAsync(this IServiceProvider serviceProvider)
@@ -119,20 +113,15 @@ public static class InfrastructureServiceRegistration
         
         try
         {
+            logger.LogInformation("Initializing database...");
             var context = services.GetRequiredService<ApplicationDbContext>();
             
-            logger.LogInformation("Checking database existence and structure");
-            
-            // For development, when we are still making changes to the model
-            // Just ensure database exists and create it without migrations if needed
+            // Simple approach: ensure database is created with the current model
             await context.Database.EnsureCreatedAsync();
-            
-            // Skip migration and just use EnsureCreated in development for now
-            // When ready for production, uncomment the migration line below
-            // await context.Database.MigrateAsync();
+            logger.LogInformation("Database created or verified");
             
             // Seed data
-            logger.LogInformation("Seeding database");
+            logger.LogInformation("Starting data seeding...");
             var seeder = services.GetRequiredService<ApplicationDbSeeder>();
             await seeder.SeedAsync();
             

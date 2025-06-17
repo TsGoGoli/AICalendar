@@ -20,6 +20,7 @@ public class Participant : BaseEntity
     // Required by EF Core
     protected Participant() : base() { }
 
+    // Constructor for when both entities are loaded
     public Participant(Event @event, User user, ParticipantStatus status = ParticipantStatus.Pending, string? note = null) : base()
     {
         Event = @event ?? throw new ArgumentNullException(nameof(@event));
@@ -28,6 +29,15 @@ public class Participant : BaseEntity
         User = user ?? throw new ArgumentNullException(nameof(user));
         UserId = user.Id;
         
+        Status = status;
+        Note = note;
+    }
+
+    // Constructor for when only IDs are available
+    public Participant(Guid eventId, Guid userId, ParticipantStatus status = ParticipantStatus.Pending, string? note = null) : base()
+    {
+        EventId = eventId;
+        UserId = userId;
         Status = status;
         Note = note;
     }

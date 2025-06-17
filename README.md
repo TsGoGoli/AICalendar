@@ -49,11 +49,18 @@ This project includes an MCP (Model Context Protocol) Server that integrates wit
 
 #### Setup Steps:
 
-1. **Configure VS Code:**
-   - Open VS Code in the project directory
-   - The `.vscode/settings.json` is already configured
+1. **Start the MCP Server:**
+   ```bash
+   cd src/MCPServer
+   dotnet run
+   ```
+   The server will start on `http://localhost:5119`
 
-2. **Use with GitHub Copilot:**
+2. **Configure VS Code:**
+   - The `.vscode/settings.json` is already configured
+   - The `mcp-config.json` contains the server configuration
+
+3. **Use with GitHub Copilot:**
    - Open GitHub Copilot Chat in VS Code
    - Type `@aicalendar` to interact with the calendar MCP server
    - Example queries:
@@ -62,13 +69,28 @@ This project includes an MCP (Model Context Protocol) Server that integrates wit
      - `@aicalendar Find available time slots for next week`
 
 #### Available MCP Features:
-- **Resources:** Get events, event participants, calendar statistics
-- **Tools:** Create events, get statistics for date ranges
-- **Analytics:** Meeting duration analysis, daily breakdowns
+- **Resources:** 
+  - `calendar://events` - Get all events
+  - `calendar://events/{eventId}/participants` - Get event participants
+  - `calendar://statistics/{startDate}/{endDate}` - Get calendar statistics
+- **Tools:** 
+  - `create_event` - Create new calendar events
+  - `get_statistics` - Get statistics for date ranges
+- **Analytics:** Meeting duration analysis, daily breakdowns, participant insights
 
-### Testing the MCP Server
+#### Testing the MCP Server
 
-Run the test script to verify MCP server functionality:
-```bash
-./test-mcp.ps1
-```
+1. **Health Check:**
+   ```bash
+   curl http://localhost:5119/health
+   ```
+
+2. **MCP Info:**
+   ```bash
+   curl http://localhost:5119/mcp/info
+   ```
+
+3. **Run Test Script:**
+   ```bash
+   ./test-mcp.ps1
+   ```

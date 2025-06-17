@@ -1,11 +1,18 @@
 {
-  "mcpServers": {
-    "aicalendar": {
-      "command": "dotnet",
-      "args": ["run", "--project", "./src/MCPServer/AICalendar.MCPServer.csproj"],
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+  "chat.editing.alwaysSaveBeforeGenerateChanges": true,
+  "nuget.includePrerelease": true,
+  "mcp": {
+    "inputs": [
+      {
+        "servers": [
+          {
+            "AI Calendar MCP Server": {
+              "url": "http://localhost:5118/"
+            }
+          }
+        ]
       }
-    }
+    ],
+    "chat.mcp.discovery.enabled": true
   }
 }

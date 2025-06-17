@@ -29,7 +29,19 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Username)
             .HasMaxLength(50);
             
+        builder.Property(u => u.PasswordHash)
+            .HasMaxLength(256);
+            
+        builder.Property(u => u.PasswordSalt)
+            .HasMaxLength(256);
+            
         builder.Property(u => u.CreatedAt)
             .IsRequired();
+            
+        // Configure Roles collection
+        builder.Property(u => u.Roles)
+            .HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
     }
 }

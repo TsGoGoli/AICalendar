@@ -5,6 +5,7 @@ using AICalendar.Application.Features.Users.Commands.UpdateUser;
 using AICalendar.Application.Features.Users.Queries.GetUserById;
 using AICalendar.Application.Features.Users.Queries.GetUsers;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AICalendar.WebAPI.Endpoints;
@@ -18,7 +19,8 @@ public static class UserEndpoints
     {
         var group = app.MapGroup("/api/users")
             .WithTags("Users")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization(); // Require authentication for all endpoints in this group
 
         // Get all users with optional filtering
         group.MapGet("/", async (IMediator mediator, string? name = null, string? email = null) =>
@@ -33,7 +35,8 @@ public static class UserEndpoints
         .WithName("GetUsers")
         .WithDescription("Get all users with optional name and email filters")
         .Produces<IReadOnlyList<UserDto>>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         // Get user by ID
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator) =>
@@ -48,7 +51,8 @@ public static class UserEndpoints
         .WithName("GetUserById")
         .WithDescription("Get a specific user by ID")
         .Produces<UserDto>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound);
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         // Create new user
         group.MapPost("/", async (CreateUserDto userDto, IMediator mediator) =>
@@ -62,8 +66,11 @@ public static class UserEndpoints
         })
         .WithName("CreateUser")
         .WithDescription("Create a new user")
+        .RequireAuthorization("RequireAdminRole") // Only admins can create users through this endpoint
         .Produces<UserDto>(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status403Forbidden);
 
         // Update existing user
         group.MapPut("/{id:guid}", async (Guid id, UpdateUserDto userDto, IMediator mediator) =>
@@ -79,6 +86,7 @@ public static class UserEndpoints
         .WithDescription("Update an existing user")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status404NotFound);
 
         // Delete user
@@ -93,8 +101,11 @@ public static class UserEndpoints
         })
         .WithName("DeleteUser")
         .WithDescription("Delete a user")
+        .RequireAuthorization("RequireAdminRole") // Only admins can delete users
         .Produces(StatusCodes.Status204NoContent)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status403Forbidden);
 
         return app;
     }

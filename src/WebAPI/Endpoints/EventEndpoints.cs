@@ -5,6 +5,7 @@ using AICalendar.Application.Features.Events.Commands.UpdateEvent;
 using AICalendar.Application.Features.Events.Queries.GetEventById;
 using AICalendar.Application.Features.Events.Queries.GetEvents;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AICalendar.WebAPI.Endpoints;
@@ -18,7 +19,8 @@ public static class EventEndpoints
     {
         var group = app.MapGroup("/api/events")
             .WithTags("Events")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization(); // Require authentication for all endpoints in this group
 
         // Get all events with optional filtering
         group.MapGet("/", async (IMediator mediator, DateTime? startDate = null, DateTime? endDate = null, int? status = null) =>
@@ -39,7 +41,8 @@ public static class EventEndpoints
         .WithName("GetEvents")
         .WithDescription("Get all events with optional date range and status filters")
         .Produces<IReadOnlyList<EventDto>>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         // Get event by ID
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator) =>
@@ -54,7 +57,8 @@ public static class EventEndpoints
         .WithName("GetEventById")
         .WithDescription("Get a specific event by ID")
         .Produces<EventDto>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound);
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         // Create new event
         group.MapPost("/", async (CreateEventDto eventDto, IMediator mediator, Guid organizerId) =>
@@ -69,7 +73,8 @@ public static class EventEndpoints
         .WithName("CreateEvent")
         .WithDescription("Create a new event")
         .Produces<EventDto>(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         // Update existing event
         group.MapPut("/{id:guid}", async (Guid id, UpdateEventDto eventDto, IMediator mediator) =>
@@ -85,6 +90,7 @@ public static class EventEndpoints
         .WithDescription("Update an existing event")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status404NotFound);
 
         // Delete event
@@ -100,7 +106,8 @@ public static class EventEndpoints
         .WithName("DeleteEvent")
         .WithDescription("Delete an event")
         .Produces(StatusCodes.Status204NoContent)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         return app;
     }

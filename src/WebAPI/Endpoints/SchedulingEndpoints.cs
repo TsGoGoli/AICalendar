@@ -1,6 +1,7 @@
 using AICalendar.Application.Features.Events.Queries.FindAvailableSlots;
 using AICalendar.Domain.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AICalendar.WebAPI.Endpoints;
@@ -14,7 +15,8 @@ public static class SchedulingEndpoints
     {
         var group = app.MapGroup("/api/scheduling")
             .WithTags("Scheduling")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization(); // Require authentication for all endpoints in this group
 
         // Find available time slots for a group of users
         group.MapPost("/find-available-slots", async (FindAvailableSlotsRequest request, IMediator mediator) =>
@@ -41,7 +43,8 @@ public static class SchedulingEndpoints
         .WithName("FindAvailableSlots")
         .WithDescription("Find available time slots for a group of users")
         .Produces<IEnumerable<TimeSlotResponse>>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status400BadRequest);
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status401Unauthorized);
 
         return app;
     }

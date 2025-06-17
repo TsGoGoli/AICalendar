@@ -52,6 +52,13 @@ public static class InfrastructureServiceRegistration
                         maxRetryDelay: TimeSpan.FromSeconds(30),
                         errorNumbersToAdd: null);
                 });
+                
+            // Suppress the pending model changes warning in development
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                options.ConfigureWarnings(warnings =>
+                    warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            }
         });
         
         // Register repositories
@@ -83,7 +90,7 @@ public static class InfrastructureServiceRegistration
                 ValidIssuer = configuration["JwtSettings:Issuer"],
                 ValidAudience = configuration["JwtSettings:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]))
+                    Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("JWT Key is not configured")))
             };
         });
         
@@ -108,21 +115,31 @@ public static class InfrastructureServiceRegistration
     {
         using var scope = serviceProvider.CreateScope();
         var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
         
         try
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             
-            // Apply migrations
-            await context.Database.MigrateAsync();
+            logger.LogInformation("Checking database existence and structure");
+            
+            // For development, when we are still making changes to the model
+            // Just ensure database exists and create it without migrations if needed
+            await context.Database.EnsureCreatedAsync();
+            
+            // Skip migration and just use EnsureCreated in development for now
+            // When ready for production, uncomment the migration line below
+            // await context.Database.MigrateAsync();
             
             // Seed data
+            logger.LogInformation("Seeding database");
             var seeder = services.GetRequiredService<ApplicationDbSeeder>();
             await seeder.SeedAsync();
+            
+            logger.LogInformation("Database initialization completed successfully");
         }
         catch (Exception ex)
         {
-            var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
             logger.LogError(ex, "An error occurred while initializing the database");
             throw;
         }

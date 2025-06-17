@@ -6,24 +6,23 @@ using System.IO;
 namespace AICalendar.Infrastructure.Persistence;
 
 /// <summary>
-/// Factory to create ApplicationDbContext for design-time operations like migrations
+/// Factory for creating DbContext instances during design-time operations like migrations
 /// </summary>
 public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        // Build configuration 
-        IConfigurationRoot configuration = new ConfigurationBuilder()
+        // Build configuration
+        var configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .Build();
+            .AddJsonFile(Path.Combine("..", "WebAPI", "appsettings.json"), optional: false)
+            .AddJsonFile(Path.Combine("..", "WebAPI", "appsettings.Development.json"), optional: true);
 
-        // Use a hardcoded connection string if appsettings.json isn't found
-        string connectionString = configuration.GetConnectionString("DefaultConnection") ?? 
-            "Server=(localdb)\\mssqllocaldb;Database=AICalendarDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+        var configuration = configurationBuilder.Build();
 
-        // Configure DbContext options
+        // Create DbContextOptions
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
         optionsBuilder.UseSqlServer(connectionString);
 
         return new ApplicationDbContext(optionsBuilder.Options);

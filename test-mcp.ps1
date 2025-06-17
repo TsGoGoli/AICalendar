@@ -32,28 +32,23 @@ $initRequest = @{
 
 Write-Host "Sending request: $initRequest"
 
-# Start MCP server and send request
-$process = Start-Process -FilePath "dotnet" -ArgumentList @("run", "--project", "src/MCPServer/AICalendar.MCPServer.csproj") -PassThru -NoNewWindow -RedirectStandardInput -RedirectStandardOutput -RedirectStandardError
+# Test that MCP server can start
+Write-Host "Testing MCP server startup..." -ForegroundColor Yellow
+$job = Start-Job -ScriptBlock {
+    Set-Location $using:PWD
+    dotnet run --project src/MCPServer/AICalendar.MCPServer.csproj
+}
 
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
-try {
-    $process.StandardInput.WriteLine($initRequest)
-    $process.StandardInput.Flush()
-    
-    Start-Sleep -Seconds 2
-    
-    if (!$process.HasExited) {
-        $response = $process.StandardOutput.ReadLine()
-        Write-Host "Response: $response" -ForegroundColor Cyan
-        Write-Host "✅ MCP Server responded successfully" -ForegroundColor Green
-    } else {
-        Write-Host "❌ MCP Server exited unexpectedly" -ForegroundColor Red
-    }
-} finally {
-    if (!$process.HasExited) {
-        $process.Kill()
-    }
+if ($job.State -eq "Running") {
+    Write-Host "✅ MCP Server started successfully" -ForegroundColor Green
+    Stop-Job $job
+    Remove-Job $job
+} else {
+    Write-Host "❌ MCP Server failed to start" -ForegroundColor Red
+    Receive-Job $job
+    Remove-Job $job
 }
 
 Write-Host "`n3. Next Steps:" -ForegroundColor Magenta

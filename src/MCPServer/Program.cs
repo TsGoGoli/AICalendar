@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using AICalendar.MCPServer.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,4 +66,4 @@ app.MapGet("/mcp/info", () => Results.Json(new
     }
 }));
 
-app.Run("http://localhost:5118");
+app.Run("http://localhost:5119");

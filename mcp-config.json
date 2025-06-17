@@ -7,7 +7,7 @@
         "servers": [
           {
             "AI Calendar MCP Server": {
-              "url": "http://localhost:5118/"
+              "url": "http://localhost:5119/"
             }
           }
         ]

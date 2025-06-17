@@ -1,0 +1,15 @@
+{
+  "github.copilot.chat.mcp.servers": {
+    "aicalendar": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project", 
+        "src/MCPServer/AICalendar.MCPServer.csproj"
+      ],
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

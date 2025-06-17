@@ -16,13 +16,11 @@ public class CalendarApiClient
         _httpClient = httpClient;
         _logger = logger;
         _baseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001";
-    }
-
-    public async Task<string> GetEventsAsync()
+    }    public async Task<string> GetEventsAsync()
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/api/v1/events");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/api/events");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -31,13 +29,11 @@ public class CalendarApiClient
             _logger.LogError(ex, "Error getting events from API");
             throw;
         }
-    }
-
-    public async Task<string> GetEventParticipantsAsync(string eventId)
+    }    public async Task<string> GetEventParticipantsAsync(string eventId)
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/api/v1/events/{eventId}/participants");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/api/events/{eventId}/participants");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -46,14 +42,12 @@ public class CalendarApiClient
             _logger.LogError(ex, "Error getting event participants from API for event {EventId}", eventId);
             throw;
         }
-    }
-
-    public async Task<string> CreateEventAsync(string jsonPayload)
+    }    public async Task<string> CreateEventAsync(string jsonPayload)
     {
         try
         {
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_baseUrl}/api/v1/events", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/events", content);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -62,13 +56,11 @@ public class CalendarApiClient
             _logger.LogError(ex, "Error creating event via API");
             throw;
         }
-    }
-
-    public async Task<string> GetEventStatisticsAsync(DateTime startDate, DateTime endDate)
+    }    public async Task<string> GetEventStatisticsAsync(DateTime startDate, DateTime endDate)
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/api/v1/events?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/api/events?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
             response.EnsureSuccessStatusCode();
             var eventsJson = await response.Content.ReadAsStringAsync();
             

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "aicalendar": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "C:\\Users\\gogol\\Desktop\\DataArt\\AICalendar\\AICalendar\\src\\MCPServer"
+      ],
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

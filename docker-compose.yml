@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: aicalendar-sql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Your_strong_password123
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $${MSSQL_SA_PASSWORD} -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  webapi:
+    build:
+      context: .
+      dockerfile: src/WebAPI/Dockerfile
+    container_name: aicalendar-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AICalendarDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True
+      - JwtSettings__Key=ChangeMe_AtLeast32Chars_Long_Long
+      - JwtSettings__Issuer=AICalendarAPI
+      - JwtSettings__Audience=AICalendarClient
+    ports:
+      - "5178:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy

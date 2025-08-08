@@ -82,6 +82,20 @@ The database seeder creates an admin and sample users:
 
 Use the Swagger “Authorize” button. Enter: `Bearer <your_token>` after calling POST `/api/auth/login`.
 
+### Run with Docker Compose (optional)
+
+Bring up SQL Server and the Web API:
+```pwsh
+docker compose up --build
+```
+- Web API: http://localhost:5178/swagger
+- SQL Server runs in a container (sa/Your_strong_password123). Data is ephemeral by default.
+
+Stop and remove containers:
+```pwsh
+docker compose down
+```
+
 ## Optional steps
 
 1) Run with HTTPS locally

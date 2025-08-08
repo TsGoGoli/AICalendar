@@ -185,6 +185,18 @@ MCP resources and tools (high level)
 - Tools: `create_event`, `update_event`, `delete_event`, `add_participant`, `update_participant_status`, `remove_participant`
 - Prompts: `schedule_meeting`, `find_best_time`
 
+### MCP Server in Docker (advanced/optional)
+
+The MCP server communicates over stdin/stdout with its client. Running it in Docker only makes sense if your MCP client can attach to the container’s stdio (or you create a bridge). If that fits your setup, you can build it:
+```pwsh
+docker build -t aicalendar-mcp ./src/MCPServer
+docker run --rm -e ASPNETCORE_ENVIRONMENT=Development -e ApiBaseUrl=http://host.docker.internal:5178 aicalendar-mcp
+```
+Otherwise, prefer running it directly on your host:
+```pwsh
+dotnet run --project src/MCPServer
+```
+
 ## Database and migrations
 
 - On startup, the API calls `EnsureCreated()` and seeds data if the DB is empty.

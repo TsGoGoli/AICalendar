@@ -135,6 +135,8 @@ dotnet test tests/Domain.Tests
 
 ## API overview
 
+![API Endpoints](src/assets/api_endpoints.png)
+
 Authentication (no auth required)
 - POST `/api/auth/register` — register and receive JWT
 - POST `/api/auth/login` — login and receive JWT

@@ -5,7 +5,7 @@
       "args": [
         "run",
         "--project",
-        "C:\\Users\\gogol\\Desktop\\DataArt\\AICalendar\\AICalendar\\src\\MCPServer"
+  "C:\\Users\\gogol\\Desktop\\AICalendar\\src\\MCPServer"
       ],
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"

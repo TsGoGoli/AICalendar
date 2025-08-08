@@ -22,7 +22,7 @@ public class SchedulingService : ISchedulingService
         IEnumerable<User> users,
         DateTimeRange searchRange,
         TimeSpan duration,
-        int maxResults = 5)
+        int maxResults = 100)
     {
         if (users == null || !users.Any())
             return Result.Failure<IReadOnlyList<DateTimeRange>>("At least one user must be specified");
@@ -81,30 +81,36 @@ public class SchedulingService : ISchedulingService
 
         // Find available slots
         var availableSlots = new List<DateTimeRange>();
-        DateTime currentStart = searchRange.Start;
-
-        foreach (var busyRange in mergedBusyRanges)
+        
+        if (!mergedBusyRanges.Any())
         {
-            // If there's enough time before this busy period, add it as an available slot
-            if (busyRange.Start - currentStart >= duration)
+            // No events: entire range is available
+            if (searchRange.Duration >= duration)
             {
-                availableSlots.Add(new DateTimeRange(currentStart, busyRange.Start));
+                availableSlots.Add(searchRange);
             }
-            
-            // Move the current time pointer to after this busy period
-            currentStart = busyRange.End > currentStart ? busyRange.End : currentStart;
         }
-
-        // Check if there's still time after the last busy period
-        if (searchRange.End - currentStart >= duration)
+        else
         {
-            availableSlots.Add(new DateTimeRange(currentStart, searchRange.End));
-        }
+            DateTime currentStart = searchRange.Start;
 
-        // If no events were found, the entire search range is available
-        if (!busyRanges.Any() && searchRange.Duration >= duration)
-        {
-            availableSlots.Add(searchRange);
+            foreach (var busyRange in mergedBusyRanges)
+            {
+                // If there's enough time before this busy period, add it as an available slot
+                if (busyRange.Start - currentStart >= duration)
+                {
+                    availableSlots.Add(new DateTimeRange(currentStart, busyRange.Start));
+                }
+
+                // Move the current time pointer to after this busy period
+                currentStart = busyRange.End > currentStart ? busyRange.End : currentStart;
+            }
+
+            // Check if there's still time after the last busy period
+            if (searchRange.End - currentStart >= duration)
+            {
+                availableSlots.Add(new DateTimeRange(currentStart, searchRange.End));
+            }
         }
 
         // Optionally split into smaller chunks of exact duration

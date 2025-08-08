@@ -11,13 +11,14 @@ public sealed class DateTimeRange
 
     public DateTimeRange(DateTime start, DateTime end)
     {
-        if (end < start)
+    if (end < start)
         {
             throw new ArgumentException("End date cannot be earlier than start date", nameof(end));
         }
 
-        Start = start.ToUniversalTime();
-        End = end.ToUniversalTime();
+    // Preserve the provided DateTime values (kind may be Unspecified/Local/UTC)
+    Start = start;
+    End = end;
     }
 
     public DateTimeRange(DateTime start, TimeSpan duration) 

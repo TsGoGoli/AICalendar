@@ -21,5 +21,5 @@ public interface ISchedulingService
         IEnumerable<User> users,
         DateTimeRange searchRange,
         TimeSpan duration,
-        int maxResults = 5);
+    int maxResults = 100);
 }

@@ -82,6 +82,43 @@ The database seeder creates an admin and sample users:
 
 Use the Swagger “Authorize” button. Enter: `Bearer <your_token>` after calling POST `/api/auth/login`.
 
+## Optional steps
+
+1) Run with HTTPS locally
+```pwsh
+dotnet dev-certs https --trust
+dotnet run --project src/WebAPI --launch-profile https
+```
+
+2) Override config with environment variables (useful for CI or local secrets)
+```pwsh
+$env:ASPNETCORE_ENVIRONMENT="Development"
+$env:ConnectionStrings__DefaultConnection="Server=.;Database=AICalendarDb;Trusted_Connection=True;TrustServerCertificate=True"
+$env:JwtSettings__Key="ChangeMe_AtLeast32Chars_Long_Long"
+dotnet run --project src/WebAPI
+```
+
+3) Use EF Core migrations (instead of EnsureCreated)
+- See the "Database and migrations" section below for commands.
+- To fully switch, replace `EnsureCreatedAsync()` with `Database.Migrate()` in `InitializeDatabaseAsync`.
+
+4) Use Dockerized SQL Server
+```pwsh
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Your_strong_password123" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+```
+Example connection string:
+```
+Server=localhost,1433;Database=AICalendarDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True
+```
+
+5) Fix Claude Desktop MCP config path
+- Update `src/MCPServer/claude_config.json` → `args` to point at your local repo path (e.g., `c:\Users\gogol\Desktop\AICalendar\src\MCPServer`).
+
+6) Run a specific test project
+```pwsh
+dotnet test tests/Domain.Tests
+```
+
 ## API overview
 
 Authentication (no auth required)
